@@ -118,8 +118,52 @@
             progressText.textContent = 'Translation in progress...';
 
             try {
-                const response = await axios.post('localhost') // The rest of the code is cut off here.
+                const response = await axios.post('localhost/translate', {
+                  text: text,
+                  languages: languages
+                });  // The rest of the code is cut off here.
+
+                const taskId = response.data.task_id;
+                alert(`Task id :${taskId}`);
+                
+                document.getElementById('progress-container').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('status-container').style.display = 'none';
+                document.getElementById('content-container').style.display = 'none';
+
+                let translationResult = null;
+                let progress = 0;
+                while(progress < 100){
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  const resultRespone = await axios.get(`localhost:8000/translate/${taskId}`);
+                  translationResult = resultRespone.data;
+                  if (translationResult === 'completed') {
+                    progress = 100;
+                  } else {
+                    progress.style.width = '50%';
+                  }
+                }
+                progress.classList.remove('bg-primary');
+                progress.classList.add('bg-success');
+                progress.style.width = `100%`;
+                progressText.textContent = 'Translation complete';
+
+                document.getElementById('translationResults').textContent = JSON.stringify(translationResult);
+                document.getElementById('results').style.display = 'block';
+            } catch (error) {
+              console.error("Error submitting translation", error);
+              alert("An error occurred while translation, pls try again")
             }
+        }
+
+        //We want to the search functionality component
+        // TODO
+        async function checkTranslationStatus(){
+          return;
+        }
+        // TODO
+        async function checkTranslationContent(){
+
         }
       </script>
 </body>

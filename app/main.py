@@ -1,11 +1,16 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi.templating import Jinja2Templates
+from . import schemas
+from . import models
+from . import crud
+from .database import get_db, engine
 from pathlib import Path
-import schemas
 
+
+models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 #Setup for Jinja2 templates
@@ -29,6 +34,6 @@ app.add_middleware(
 @app.post("/translate", response_model=schemas.TaskResponse)
 def translate(request: schemas.TranslationRequest):
     # create a new translation task
-    task = crud.create_translation_task(x, y, ,p)
+    task = crud.create_translation_task(get_db.db, request.text, request.languages)
 
-    Background_tasks.add_task(perform_translation, task_id, request.text, request.languages, db)
+    #Background_tasks.add_task(perform_translation, task_id, request.text, request.languages, get_db.db)

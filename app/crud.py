@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-import models
+from . import models
 
-def create_translation_task(db: Session, text: str, languages: list)
+def create_translation_task(db: Session, text: str, languages: list):
     task = models.TranslationTask(text=text, languages=languages)
     db.add(task)
     db.commit()

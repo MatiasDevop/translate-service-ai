@@ -17,11 +17,6 @@ app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-@app.get('/index', response_class=HTMLResponse)
-def index(request: Request):
-    return templates.TemplateResponse("index.html",  { "request": request})
-
-
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -31,9 +26,19 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+#################################################################
+
+@app.get('/index', response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse("index.html",  { "request": request})
+
+
+
 @app.post("/translate", response_model=schemas.TaskResponse)
-def translate(request: schemas.TranslationRequest):
+def translate(request: schemas.TranslationRequest, background):
     # create a new translation task
     task = crud.create_translation_task(get_db.db, request.text, request.languages)
 
-    #Background_tasks.add_task(perform_translation, task_id, request.text, request.languages, get_db.db)
+    Background_tasks.add_task(perform_translation, task_id, request.text, request.languages, get_db.db)
+
+    return { "task_id": {task.id}}

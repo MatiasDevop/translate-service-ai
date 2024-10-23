@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
+from sqlalchemy.orm import Session
 from . import schemas
 from . import models
 from . import crud
@@ -35,10 +36,34 @@ def index(request: Request):
 
 
 @app.post("/translate", response_model=schemas.TaskResponse)
-def translate(request: schemas.TranslationRequest, background):
+def translate(request: schemas.TranslationRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+
     # create a new translation task
     task = crud.create_translation_task(get_db.db, request.text, request.languages)
 
-    Background_tasks.add_task(perform_translation, task_id, request.text, request.languages, get_db.db)
+    background_tasks.add_task(perform_translation, task_id, request.text, request.languages, db)
 
     return { "task_id": {task.id}}
+
+
+
+@app.post("/translate/{task_id}", response_model=schemas.TranslationStatus)
+def get_translate(task_id: int, db: Session = Depends(get_db)):
+
+    # create a new translation task
+    task = crud.create_translation_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="task not found")
+
+    return { "task_id": task.id, "status": task.status, "translation": task.translations }
+
+
+@app.post("/translate/content/{task_id}", response_model=schemas.TranslationStatus)
+def get_translate_content(task_id: int, db: Session = Depends(get_db)):
+
+    # create a new translation task
+    task = crud.get_translation_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="task not found")
+
+    return { task }

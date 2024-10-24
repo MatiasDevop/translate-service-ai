@@ -4,11 +4,15 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy.orm import Session
+
+from app.utils import perform_translation
+
 from . import schemas
 from . import models
 from . import crud
 from .database import get_db, engine
 from pathlib import Path
+from app import crud
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -41,9 +45,9 @@ def translate(request: schemas.TranslationRequest, background_tasks: BackgroundT
     # create a new translation task
     task = crud.create_translation_task(get_db.db, request.text, request.languages)
 
-    background_tasks.add_task(perform_translation, task_id, request.text, request.languages, db)
+    background_tasks.add_task(perform_translation, task.id, request.text, request.languages, db)
 
-    return { "task_id": {task.id}}
+    return { "task_id": task.id}
 
 
 

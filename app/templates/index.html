@@ -70,7 +70,7 @@
         <div class="container form-container">
           <div class="form-box">
             <label for="text" class="form-label">Text to Translate</label>
-            <textarea id="text" class="form-control" rows="10"></textarea>
+            <textarea id="textToTranslate" class="form-control" rows="10"></textarea>
           </div>
           <div class="form-box">
             <label for="languages" class="form-label">Languages</label>
@@ -105,7 +105,7 @@
             const text = document.getElementById('textToTranslate').value;
             const languages = document.getElementById('languages').value.split(',').map(lang => lang.trim());
 
-            if (!text || languages === 0 || languages[0]) {
+            if (!text || languages === 0 || languages[0] === "") {
                 alert("Please provide both text and target language.");
                 return;
             }
